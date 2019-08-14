@@ -112,7 +112,9 @@
 	            <rewrite>
 	                <sales_order_shipment_view>Ecom_Express_Block_Adminhtml_Sales_Order_Shipment_View</sales_order_shipment_view>
 	            </rewrite>
-    
+    			<!-- <rewrite>
+	            	<sales_order_invoice_create_tracking>Ecom_Express_Block_Adminhtml_Sales_Order_Invoice_Create_Tracking</sales_order_invoice_create_tracking>
+	            </rewrite> -->
  			  </adminhtml> 
         </blocks>
         <helpers>

@@ -28,7 +28,7 @@ class Ecom_Express_Helper_Data extends Mage_Core_Helper_Abstract {
 	 public function executeCurl($url,$type,$params)
 	{
 		try {
-		     
+			
 			$ch = curl_init();
 			curl_setopt($ch,CURLOPT_URL,$url);
 			curl_setopt($ch,CURLOPT_FAILONERROR,1);
@@ -48,45 +48,58 @@ class Ecom_Express_Helper_Data extends Mage_Core_Helper_Abstract {
 			endif;
 	
 			$retValue = curl_exec($ch);
+			//print_r($retValue);die('in helper');
 			$info_code = curl_getinfo($ch);
-		 
-	
 			if (!curl_errno($ch))
 			{   
 				switch ($http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
 					case 200:
 						if(!strcmp($retValue,"Unauthorised Request"))
-						{ 
-							
-							$myMsg ="Unauthorised username and Password";
-							Mage::getSingleton('core/session')->setMyMsg($myMsg);
+						{
+							Mage::log($params,null,'ecom_request.log');
+							Mage::log($retValue,null,'ecom_response.log');
+							Mage::getSingleton('core/session')->addError(Mage::helper('ecomexpress')->__("Unauthorised username and Password"));
+							throw new Exception();
+					
 						}
 						if(!strcmp($retValue,"You are not authorised!"))
 						{
-							$myMsg ="Unauthorised Username and Password";
-							Mage::getSingleton('core/session')->setMyMsg($myMsg);
+							Mage::log($params,null,'ecom_request.log');
+							Mage::log($retValue,null,'ecom_response.log');
+							Mage::getSingleton('core/session')->addError(Mage::helper('ecomexpress')->__("Unauthorised username and Password"));
+							throw new Exception();
 						}
 						if(!$retValue)
 						{
-							return false;
+							
+							Mage::log($params,null,'ecom_request.log');
+							Mage::log($retValue,null,'ecom_response.log');
+							Mage::getSingleton('core/session')->addError(Mage::helper('ecomexpress')->__("Ecom API server returned an error"));
+							throw new Exception();
+							
 						}
+						
 						curl_close($ch);
 						return $retValue;
 						break;
 					default:
-						if($errno = curl_errno($ch)) {
-							$error_message = curl_strerror($errno);
-							break;				
+						if($errno = curl_errno($ch)) { 
+							Mage::log($params,null,'ecom_request.log');
+							Mage::log($retValue,null,'ecom_response.log');
+							Mage::getSingleton('core/session')->addError(Mage::helper('ecomexpress')->__("Ecom API server returned an error"));
+							throw new Exception();				
 						}
-						$infoMsg="Ecom service is currently Unavilable , please try after Sometime";
-						Mage::getSingleton(‘core/session’)->setInfoMsg($myMsg);
+						
 				}
 			}
 			
 		}
 		catch(Exception $e)
-		{    
-			return	$e->getMessage();
+		{
+			Mage::log($params,null,'ecom_request.log');
+			Mage::log($retValue,null,'ecom_response.log');
+			Mage::getSingleton('core/session')->addError(Mage::helper('ecomexpress')->__($e->getMessage()));
+			throw new Exception();
 		}
 	}
 	 

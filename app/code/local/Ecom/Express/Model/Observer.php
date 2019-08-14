@@ -21,48 +21,32 @@ class Ecom_Express_Model_Observer
 	 * Function to add waybill if shipping method is of Ecomexpress
 	 */
 	public function salesOrderShipmentSaveBefore($observer)
-	{
-		
-	
-	if(empty(Mage::app()->getRequest()->getParam("manual"))){
+	{ 
+		if(strpos(Mage::helper('core/url')->getCurrentUrl(), 'email') !== false){
+			return;
+		}
 		
 		$invoice = $observer->getEvent()->getInvoice();
 		$shipment = $observer->getEvent()->getShipment();
 		$order = $shipment->getOrder();
-		$shipping_method= $order->getShippingMethod();
+		$shipping_method = $order->getShippingMethod();
+		$shipping_detail = Mage::app()->getRequest()->getPost('tracking');
+		$payment = $order->getPayment()->getMethodInstance()->getCode();
 		
-		if(strpos($shipping_method, 'ecomexpress') !== false)
+		if(strpos($shipping_method, 'ecomexpress') !== false && !isset($shipping_detail[1]))
 		{
-			$order = Mage::getModel('sales/order')->load($order->getEntityId());
-			$payment = $order->getPayment()->getMethodInstance()->getCode();
-				
-		
-			if($payment == 'cashondelivery'){
+			$pay_type = 'PPD';
+			if($payment == 'cashondelivery' || $payment=='checkmo' || $payment == 'msp_cashondelivery')
 				$pay_type = 'COD';
+				
 				$model = Mage::getModel('ecomexpress/awb')->getCollection()
-				->addFieldToFilter('state',0)
-				->addFieldToFilter('awb_type','COD')->getData();
-			}
-			else{
-					
-				$pay_type = 'PPD';
-				$model = Mage::getModel('ecomexpress/awb')->getCollection()
-				->addFieldToFilter('state',0)
-				->addFieldToFilter('awb_type','PPD')->getData();
-		
-			}
+							->addFieldToFilter('state',0)
+							->addFieldToFilter('awb_type',$pay_type)->getFirstItem()->getData();
 				
 			if(count($model)>0){
-		
-				foreach($model as $models)
-				{
-					$awbno = $models['awb'];
-					break;
-				}
+				$awbno = $model['awb'];
 				$response = Mage::getModel('ecomexpress/automaticawb')->authenticateAwb($order,$pay_type,$awbno);
-		
-					
-				 
+ 
 				foreach($response as $res) {
 					foreach ($res as $value){
 					}
@@ -72,35 +56,53 @@ class Ecom_Express_Model_Observer
 					$track = Mage::getModel('sales/order_shipment_track')
 					->setNumber($awbno)
 					->setCarrierCode('ecomexpress')
-					->setTitle('ecomexpress');
+					->setTitle('Ecom Express');
 					$shipment->addTrack($track);
 				}
 				else {
-					$track = Mage::getModel('sales/order_shipment_track')
-					->setNumber($value['awb'])
-					->setCarrierCode('ecomexpress')
-					->setTitle('ecomexpress');
-					$shipment->addTrack($track);
+					
+					Mage::log($response,null,'ecom_response.log');
+					Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__($value['reason']));
+					throw new Exception();
 				}
 			}
 			else {
 				Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__('AWB number is not available'));
-					
+				throw new Exception();
+			}
+		}
+		elseif(isset($shipping_detail[1]) && ($shipping_detail[1]['carrier_code']=='ecomexpress'))
+		{   
+			$awbno = $shipping_detail[1]['number'];
+			$pay_type = 'PPD';
+			if($payment == 'cashondelivery' || $payment=='checkmo' || $payment == 'msp_cashondelivery')
+				$pay_type = 'COD';
+			$response = Mage::getModel('ecomexpress/automaticawb')->authenticateAwb($order,$pay_type,$awbno);
+	
+			foreach($response as $res) {
+				foreach ($res as $value){
+				}
+			}
+			if(isset($value['success']) && $value['success']==1){
+				Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('ecomexpress')->__('AWB number has been assigned successfully.'));
+				return;
+			}
+			else {
+				
+				Mage::log($response,null,'ecom_response.log');
+				Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__($value['reason']));
+				throw new Exception();
 			}
 		}
 		
 	}
-
-}
 	
 	
 	/**
 	 * Function to update waybill if order tracking is of Ecomexpress
 	 */
 	public function salesOrderShipmentTrackSaveAfter($observer)
-	{
-		if(empty(Mage::app()->getRequest()->getParam("manual"))){
-		
+	{	
 		$track = $observer->getEvent()->getTrack();
 		$order = $track->getShipment()->getOrder();
 		$shippingMethod = $order->getShippingMethod();
@@ -128,39 +130,6 @@ class Ecom_Express_Model_Observer
 		$model->setId($awbobj);
 		$model->save(); 
 		return;
-	
-	}
-	
-	 else{
-		
-	 	$track = $observer->getEvent()->getTrack();
-		$order = $track->getShipment()->getOrder();
-		$shippingMethod = $order->getShippingMethod();
-		
-		if(!$shippingMethod)
-		{
-			return;
-		}
-		
-		if($track->getCarrierCode() !='ecomexpress')
-		{
-			return ;
-		} 
-		
-		$model = Mage::getModel('ecomexpress/awb');
-		$awbobj = $model->loadByAwb($track->getNumber());
-		$awb_data=array();
-		$awb_data['status']='Assigned';
-		$awb_data['state'] = 1;
-		$awb_data['orderid'] = $order->getId();
-		$awb_data['shipment_to']  = $order->getShippingAddress()->getName();
-		$awb_data['shipment_id']  = $track->getShipment()->getEntityId();
-		$awb_data['updated_at']   = Mage::getModel('core/date')->date('Y-m-d H:i:s');
-		$model->setData($awb_data);
-		$model->setId($awbobj);
-		$model->save();
-		return;
-	} 
 
 }
 
@@ -300,5 +269,4 @@ class Ecom_Express_Model_Observer
 			return;
 		}	
 	}
-	
  }

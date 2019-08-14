@@ -45,4 +45,28 @@
             </action>
         </reference>
     </adminhtml_sales_order_shipment_view>
+    <!-- <adminhtml_sales_order_shipment_new>
+        <reference name="shipment_tracking">
+            <action method="setTemplate">
+                <template>ecomexpress/tracking.phtml</template>
+            </action>
+        </reference>
+    </adminhtml_sales_order_shipment_new> -->
+    <adminhtml_sales_order_shipment_new>
+        <reference name="content">
+            <block type="ecomexpress/adminhtml_addtrack" name="ecom.shipment" after="-" template="ecomexpress/addtracking.phtml" />
+        </reference>
+    </adminhtml_sales_order_shipment_new>
+    <adminhtml_sales_order_invoice_new>
+        <reference name="content">
+            <block type="ecomexpress/adminhtml_addtrack" name="ecom.invoice" after="-" template="ecomexpress/addtracking.phtml" />
+        </reference>
+    </adminhtml_sales_order_invoice_new>
+     <!-- <adminhtml_sales_order_invoice_new>
+        <reference name="invoice_tracking">
+            <action method="setTemplate">
+                <template>ecomexpress/tracking.phtml</template>
+            </action>
+        </reference>
+    </adminhtml_sales_order_invoice_new> -->
 </layout>

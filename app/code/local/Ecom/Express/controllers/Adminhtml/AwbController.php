@@ -198,7 +198,13 @@ class Ecom_Express_Adminhtml_AwbController extends Mage_Adminhtml_Controller_Act
         $response->setHeader('Content-type', $contentType);
         $response->setBody($content);
         $response->sendResponse();
-        die;
+        //die;
+    }
+    
+    protected function _isAllowed()
+    {
+    	return Mage::getSingleton('admin/session')->isAllowed('ecomexpress/awb');
+    
     }
 		
 }

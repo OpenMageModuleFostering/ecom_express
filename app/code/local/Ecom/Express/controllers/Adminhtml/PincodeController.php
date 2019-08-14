@@ -144,4 +144,9 @@ class Ecom_Express_Adminhtml_PincodeController extends Mage_Adminhtml_Controller
 		}
 		$this->_redirect('*/*/');
     }
+    protected function _isAllowed()
+    {
+    	return Mage::getSingleton('admin/session')->isAllowed('ecomexpress/pincode');
+    
+    }
 }

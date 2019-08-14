@@ -32,15 +32,16 @@ class Ecom_Express_Block_Adminhtml_Renderer_Shipmentid extends Mage_Adminhtml_Bl
 			
         $order =Mage::getModel('sales/order')->load($row->getOrderid());
         $shipmentCollection = $order->getShipmentsCollection()->getData();
-        
+        //print_r($shipmentCollection);
         foreach ($shipmentCollection as $ship){
         	
         	$shipment_id = $ship['entity_id'];
+        	$incrementId = $ship['increment_id'];
         }
         
         $shipment_url = Mage::helper("adminhtml")->getUrl("adminhtml/sales_shipment/view/",[ 'shipment_id'=> $shipment_id]);
      
-        $link = '<a href="'. $shipment_url .'">'.$order->getData('entity_id').'</a>';
+        $link = '<a href="'. $shipment_url .'">'.$incrementId.'</a>';
      
 		return	$link;
 		}

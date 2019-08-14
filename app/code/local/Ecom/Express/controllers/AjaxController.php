@@ -35,7 +35,7 @@ class Ecom_Express_AjaxController extends Mage_Core_Controller_Front_Action {
 			$payment = $order->getPayment()->getMethodInstance()->getCode();
 		
 		
-			if($payment == 'cashondelivery'){
+			if($payment == 'cashondelivery' || $payment == 'msp_cashondelivery'){
 				$pay_type = 'COD';
 				$model = Mage::getModel('ecomexpress/awb')->getCollection()
 				->addFieldToFilter('state',0)

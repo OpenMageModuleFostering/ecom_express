@@ -53,15 +53,19 @@ class Ecom_Express_Model_Automaticawb extends Mage_Core_Model_Abstract {
 		
 		$item = $order->getAllItems();
 		
-		
+		$item_weight = 0;
 		$description = array();
 		foreach($item as $item_description)
 		{
 			$params['json_input']['ITEM_DESCRIPTION'] = $item_description->getName(); 
-			$item_description['weight']= $item_description['weight'];
+			$item_weight += $item_description['weight'];
 		}
-		
-		$params['json_input']['ACTUAL_WEIGHT'] = $item_description['weight'];
+		//print_r($item_description['weight']);die(get_class($this));
+		if(!$item_weight>0){
+			Mage::getSingleton('core/session')->addError(Mage::helper('ecomexpress')->__('Product weight must be greater than zero.'));
+			throw new Exception();
+		}
+		$params['json_input']['ACTUAL_WEIGHT'] = $item_weight;
 		$params['json_input']['PIECES'] =	$order['total_item_count'];
 		
 		
@@ -79,12 +83,19 @@ class Ecom_Express_Model_Automaticawb extends Mage_Core_Model_Abstract {
 			 ->addAttributeToFilter('ecom_height',array('notnull' => true))
 			 ->addAttributeToFilter('ecom_width',array('notnull' => true))
 			 ->addAttributeToFilter('sku', array('in' => $item_description->getData('sku')));
-			 	
-			 foreach($package_collection as $packge_dimension){
-			 $params['json_input']['LENGTH']  = $packge_dimension->getData('ecom_length');
-			 $params['json_input']['BREADTH'] =  $packge_dimension->getData('ecom_width');
-			 $params['json_input']['HEIGHT'] = $packge_dimension->getData('ecom_height');
-			 } 
+			 if(!count($package_collection)>0){
+			 	$params['json_input']['LENGTH']  = '10';
+			 	$params['json_input']['BREADTH'] =  '10';
+			 	$params['json_input']['HEIGHT'] = '10';
+			 }
+			 else{
+				 foreach($package_collection as $packge_dimension){
+					 $params['json_input']['LENGTH']  = $packge_dimension->getData('ecom_length');
+					 $params['json_input']['BREADTH'] =  $packge_dimension->getData('ecom_width');
+					 $params['json_input']['HEIGHT'] = $packge_dimension->getData('ecom_height');
+				 } 
+			 }
+			
 								
 			$params['json_input']['PICKUP_NAME'] = Mage::getStoreConfig('general/store_information/name');
 			$params['json_input']['PICKUP_ADDRESS_LINE1'] = Mage::getStoreConfig('shipping/origin/street_line1');
@@ -98,7 +109,14 @@ class Ecom_Express_Model_Automaticawb extends Mage_Core_Model_Abstract {
 			$params['json_input']['RETURN_ADDRESS_LINE2'] = Mage::getStoreConfig('shipping/origin/street_line2');
 			$params['json_input']['RETURN_PHONE'] =  Mage::getStoreConfig('general/store_information/phone'); 
 			$params['json_input']['RETURN_MOBILE'] =  Mage::getStoreConfig('general/store_information/phone');
-			
+			if(!$params['json_input']['PICKUP_NAME'] || !$params['json_input']['PICKUP_PHONE']){
+				Mage::getSingleton('core/session')->addError(Mage::helper('ecomexpress')->__('Fill the store information first'));
+				throw new Exception();
+			}
+			if(!$params['json_input']['PICKUP_PINCODE'] || !$params['json_input']['PICKUP_ADDRESS_LINE1']){	
+				Mage::getSingleton('core/session')->addError(Mage::helper('ecomexpress')->__('Fill the shipping setting details first'));
+				throw new Exception();
+			}
 		
 		if(Mage::getStoreConfig('carriers/ecomexpress/sanbox') ==1)	
 			$url = 'http://ecomm.prtouch.com/apiv2/manifest_awb/';   
@@ -107,43 +125,26 @@ class Ecom_Express_Model_Automaticawb extends Mage_Core_Model_Abstract {
 		
 			
 		if($params)
-			{	
-				$params['json_input'] = json_encode($params['json_input'],true);
-				$params['json_input'] =  "[ ".$params['json_input']."]";
-				$retValue = Mage::helper('ecomexpress')->executeCurl($url,$type,$params); 
-				$getSessionInfo = Mage::getSingleton('core/session')->getInfoMsg();
+		{	
+			$params['json_input'] = json_encode($params['json_input'],true);
+			$params['json_input'] =  "[ ".$params['json_input']."]";
+			$retValue = Mage::helper('ecomexpress')->executeCurl($url,$type,$params); 
 			
-				
-				if(isset($getSessionInfo)){
-						
-					Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__($getSessionInfo));
-					Mage::getSingleton('core/session')->unsInfoMsg();
-					$this->_redirect('adminhtml/sales_shipment/index/');
-					return ;
-				}
-				$getSessionMsg = Mage::getSingleton('core/session')->getMyMsg();
-					
-				
-				if(isset($getSessionMsg)){
-						
-					Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__($getSessionMsg));
-					Mage::getSingleton('core/session')->unsMyMsg();
-					$this->_redirect('adminhtml/sales_shipment/index/');
-					return;
-						
-				}
-				$awb_codes   =  Mage::helper('core')->jsonDecode($retValue);
-				
-				if(empty($awb_codes))
-				{	
-				
-					Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__('Please add valid Username,Password and Count in plugin configuration'));
-				}
-				return $awb_codes;
-			}
-		else
+			$awb_codes   =  Mage::helper('core')->jsonDecode($retValue);
+			
+			if(empty($awb_codes))
 			{
-				Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__('Please add valid Username and Password in plugin configuration'));
+				Mage::log($params,null,'ecom_request.log');
+				Mage::log($retValue,null,'ecom_response.log');
+				Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__('Ecom API server returned an error'));
+				throw new Exception();
 			}
+			return $awb_codes;
+		}
+		else
+		{
+			Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ecomexpress')->__('Kindly fill all the required details'));
+			throw new Exception();
+		}
 	}
 }

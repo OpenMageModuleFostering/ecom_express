@@ -169,4 +169,10 @@ class Ecom_Express_Adminhtml_TrackController extends Mage_Adminhtml_Controller_A
 			echo "AWB is not Tracked";
 		}
 	}	
+	
+	protected function _isAllowed()
+	{ 
+		return true;
+	
+	}
 }

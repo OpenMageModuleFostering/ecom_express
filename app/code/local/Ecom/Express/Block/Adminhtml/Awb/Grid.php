@@ -114,7 +114,7 @@ class Ecom_Express_Block_Adminhtml_Awb_Grid extends Ecom_Express_Block_Adminhtml
         ));		
          $this->addColumn('orderid', array(
             'header' => Mage::helper('ecomexpress')->__('Order#'),
-        	//'index'=>'orderid',
+        	'index'=>'orderid',
          	'renderer' =>  'Ecom_Express_Block_Adminhtml_Renderer_Orderid'
            
         ));

@@ -36,18 +36,25 @@ implements Mage_Shipping_Model_Carrier_Interface
   			return false;
 		}
 		$result = Mage::getModel('shipping/rate_result');
-		$quote = Mage::getSingleton('checkout/session')->getQuote();		
-		$shippingAddress = $quote->getShippingAddress();
-		$to_country = $shippingAddress->getCountryId(); 
-		$to_city = $shippingAddress->getCity();
-		$to_zipcode = $shippingAddress->getPostcode();
+		//$quote = Mage::getSingleton('checkout/session')->getQuote();		
+		//$shippingAddress = $quote->getShippingAddress();
+		$to_country = $request->getCountryId(); 
+		//$to_city = $shippingAddress->getCity();
+		$to_zipcode = $request->getDestPostcode();
 		$allowed_country = array();
 		$allowed_country = explode(',',Mage::getStoreConfig('carriers/ecomexpress/specificcountry'));
-		if($to_zipcode)
-			$model = Mage ::getModel('ecomexpress/pincode')->loadByPincode($to_zipcode);
+		if(!Mage::getStoreConfig('carriers/ecomexpress/sallowspecific')){
+			$allowed_countries = Mage::getModel('directory/country')->getResourceCollection()->loadByStore()->toOptionArray(false);
+			foreach($allowed_countries as $allowed_countrys)
+				$allowed_country[] = $allowed_countrys['value'];
+		}
+//print_r();die('--');
+		if($to_zipcode || ctype_digit($to_zipcode))
+			$model = Mage::getModel('ecomexpress/pincode')->load($to_zipcode,'pincode');
+		//print_r($model);die;
 		
-		if(isset($model) && in_array($to_country,$allowed_country)== true)
-		{
+		if(count($model->getData())>0 && in_array($to_country,$allowed_country)== true)
+		{ 
 			
 			if(Mage::getStoreConfig('carriers/ecomexpress/handling') == true){
 				$price = Mage::getStoreConfig("carriers/ecomexpress/handling_charge");

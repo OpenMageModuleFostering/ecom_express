@@ -17,44 +17,49 @@
  
 <config>
 		<menu>
-            <ecomexpress module="ecomexpress">
+            <ecomexpress module="ecomexpress" translate="title">
                 <title>Ecom Express</title>
                 <sort_order>75</sort_order>
                 <children>
-               		 <pincode>
+               		 <pincode module="ecomexpress" translate="title">
 						<title>Manage Pincode</title>
 						<sort_order>0</sort_order>
-						<action>adminhtml/adminhtml_pincode</action>
-					</pincode>	
-                    <awb>
+						<action>adminhtml/adminhtml_pincode/index</action>
+					</pincode>
+				</children>
+                <children>	
+                    <awb module="ecomexpress" translate="title">
                         <title>Manage AWB</title>
                         <sort_order>2</sort_order>
-						<action>adminhtml/adminhtml_awb</action>
+						<action>adminhtml/adminhtml_awb/index</action>
 					</awb>			                  
                 </children>
             </ecomexpress>
         </menu>
-        
-         <acl>
+        <acl>
             <resources>
                 <all>
                     <title>Allow Everything</title>
                 </all>
                 <admin>
                     <children>
-                        <ecomexpress>
+                        <ecomexpress module="ecomexpress" translate="title">
                             <title>Ecom Express</title>
-                            <sort_order>11</sort_order>
+                            <sort_order>75</sort_order>
                             <children>
-                           		<pincode>
+                           		<pincode module="ecomexpress" translate="title">
                                     <title>Manage Pincode</title>
+                                    <sort_order>0</sort_order>
                                 </pincode>
-                                <awb>
+                           </children>
+                           <children>
+                                <awb module="ecomexpress" translate="title">
                                     <title>Manage AWB</title>
+                                    <sort_order>2</sort_order>
                                 </awb>
                             </children>
                         </ecomexpress>
-                        <system>
+                         <system>
                             <children>
                                 <config>
                                     <children>

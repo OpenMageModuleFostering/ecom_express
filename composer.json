@@ -1,13 +1,13 @@
 {
     "name": "OpenMageModuleFostering/Ecom_Express",
     "type": "magento-module",
-    "license": "OSL",
+    "license": "Open-Software-License-(OSL)",
     "homepage": "",
-    "description": "ECOM EXPRESS",
+    "description": "Ecom_Express",
     "authors": [
     {
-        "name": "CedCommerce",
-        "email": "connect@cedcommerce.com"
+        "name": "Cedcommerce",
+        "email": "support@cedcommerce.com"
     }
 ],
     "suggest": {

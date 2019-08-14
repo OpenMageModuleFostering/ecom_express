@@ -48,22 +48,24 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
         $invoice_id = Mage::app()->getRequest()->getParam('invoice_id');
         $shipment = Mage::getModel('sales/order_shipment')->load($invoice_id);
    
-        $my_order = Mage::getModel('ecomexpress/awb')->getCollection()->addFieldToFilter('orderid',$shipment->getData('order_id'))->getData();
+        $my_order = Mage::getModel('ecomexpress/awb')->getCollection()->addFieldToFilter('shipment_id',$shipment->getEntityId())->getData();
   
         foreach($my_order as $order_data)
         {
       	  $waybill_no	= $order_data['awb'];
         }
          
-        $admin_address= $this->_formatAddress(Mage::getStoreConfig('shipping/origin/street_line1').",".Mage::getStoreConfig('shipping/origin/street_line2'));
+        $admin_address= $this->_formatAddress(Mage::getStoreConfig('shipping/origin/street_line1').",".Mage::getStoreConfig('shipping/origin/street_line2').",".Mage::getStoreConfig('shipping/origin/city').
+             					  ",".Mage::getStoreConfig('shipping/origin/region_id').",".Mage::getStoreConfig('shipping/origin/postcode').
+              					  ",".Mage::helper('sales')->__(Mage::app()->getLocale()->getCountryTranslation(Mage::getStoreConfig('shipping/origin/country_id'))));
 		
         
-        if(strlen(Mage::getStoreConfig('shipping/origin/street_line1').",".Mage::getStoreConfig('shipping/origin/street_line2'))< 30){
+        /* if(strlen($admin_address)< 30){
          	$i=0;
-        	$page->drawText(Mage::helper('sales')->__(Mage::getStoreConfig('shipping/origin/street_line1').",".Mage::getStoreConfig('shipping/origin/street_line2')),410, ($this->y+310), 'UTF-8');
+        	$page->drawText(Mage::helper('sales')->__($admin_address),410, ($this->y+310), 'UTF-8');
        
         }
-        else{
+        else{ */
         	$line = 822;
         	$i=20;
         	foreach ($admin_address as $value){
@@ -76,7 +78,7 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
         			}
         		}$i++;
         	}
-        }       
+        //}       
         $page->drawText(Mage::helper('sales')->__('Email: '.Mage::getStoreConfig('trans_email/ident_general/email')), 410, $this->y+284-$i, 'UTF-8');
         $page->drawText(Mage::helper('sales')->__('Phone: '.Mage::getStoreConfig('general/store_information/phone')), 410, $this->y+273-$i, 'UTF-8');
                        
@@ -135,13 +137,13 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
         	);
         
         	$lines[0][] = array(
-        			'text'  => Mage::helper('sales')->__('Quantity'),
-        			'feed'  => 450,
+        			'text'  => Mage::helper('sales')->__('Qty'),
+        			'feed'  => 445,
         			'align' => 'right'
         	);
         	$lines[0][] = array(
-        			'text'  => Mage::helper('sales')->__('value'),
-        			'feed'  => 560,
+        			'text'  => Mage::helper('sales')->__('Value'),
+        			'feed'  => 540,
         			'align' => 'right'
         	);
         }else {   
@@ -184,15 +186,15 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
     	
     	$invoice_id = Mage::app()->getRequest()->getParam('invoice_id');
     	$shipment = Mage::getModel('sales/order_shipment')->load($invoice_id);
-    	 
-    	$current_shipping_method = Mage::getModel('sales/order')
-                                	->load($shipment->getData('order_id'))
-                                	->getShippingMethod();
+    	//print_r($shipment->getData());die;
+    	$trackings=Mage::getResourceModel('sales/order_shipment_track_collection')->addAttributeToFilter('parent_id',$shipment->getEntityId());
+		foreach($trackings as $tracking)
+			$current_shipping_method = $tracking->getCarrierCode();
     	
-    	if(strcmp($current_shipping_method, 'ecomexpress_ecomexpress') == true)
+    	if($current_shipping_method!='ecomexpress')
     	{
     		return Mage::getModel('sales/order_pdf_Shipment')->getPdf($shipments);
-    	}
+    	} 
         	
         $this->_beforeGetPdf();
         $this->_initRenderer('shipment');
@@ -216,7 +218,7 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
             $this->insertEcomLogo($page, $shipment->getStore());
 
             /* Add address */
-            $this->insertEcomAddress($page, $shipment->getStore());
+            //$this->insertEcomAddress($page, $shipment->getStore());
             /* Add head */
             $this->insertEcomOrder(
                 $page,
@@ -245,7 +247,7 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
                 $prod_length =array();
                 $prod_width =array();
                 $prod_height =array();
-                
+                $flag = true;
                 $length_yship = array();
 	              foreach($cartitem as $key=>$value){
 	              	
@@ -269,9 +271,9 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
 	               	$page->drawText(date("d.m.Y", strtotime($date)), 140, $yShipments, 'UTF-8');
 	               	
 	               	
-	               	if(strlen($value['name']) > 15){
+	               	if(strlen($value['name']) > 25){
 	               		
-	               		$productName = substr($value['name'],0,15).' ...';
+	               		$productName = substr($value['name'],0,25).' ...';
 	               	}else{
 	               		$productName = $value['name'];
 	               	}
@@ -286,26 +288,26 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
 	               		$addressy -= 10;
 	               	} 
 	               	
-	     	       	$page->drawText((int)$value["qty"], 410, $yShipments, 'UTF-8');
+	     	       	$page->drawText((int)$value["qty"], 430, $yShipments, 'UTF-8');
 	               	$paymentInfo = Mage::helper('payment')->getInfoBlock($order->getPayment())
 					               	->setIsSecureMode(true)
 					               	->toPdf();
 	               	$paymentInfo = htmlspecialchars_decode($paymentInfo, ENT_QUOTES);
 	               	$payment = explode('{{pdf_row_separator}}', $paymentInfo);
-	               		               		
+	               	$paymentMethod = $order->getPayment()->getMethodInstance()->getCode();	               		
                		$grand_total= $order->getTaxAmount() + $order->getGrandTotal();
-               		$page->drawText(Mage::helper('sales')->__('₹') .$value["price"] * $value["qty"], 535, ($yShipments), 'UTF-8');
+               		$page->drawText(Mage::helper('sales')->__(Mage::app()->getLocale()->currency($order->getOrderCurrencyCode())->getSymbol()) .$value["price"] * $value["qty"], 510, ($yShipments), 'UTF-8');
 	          
 	              	$subtotal+=$value["price"]*$value["qty"];
 	              	$page->drawLine(120,  $yShipments + 45, 120,  $yShipments+30); //left
 	              	$page->drawLine(220,  $yShipments + 45, 220,  $yShipments+30); //left
-	              	$page->drawLine(360,  $yShipments + 45, 360,  $yShipments+30); //left
+	              	$page->drawLine(390,  $yShipments + 45, 390,  $yShipments+30); //left
 	              	$page->drawLine(490,  $yShipments + 45, 490,  $yShipments+30); //left
 	              	
 	              	$page->drawLine(25,  $yShipments-10, 25,  $yShipments+30);   //left
 	              	$page->drawLine(120,  $yShipments-10, 120,  $yShipments+30); //left
 	              	$page->drawLine(220,  $yShipments-10, 220,  $yShipments+30); //left
-	              	$page->drawLine(360,  $yShipments-10, 360,  $yShipments+30); //left
+	              	$page->drawLine(390,  $yShipments-10, 390,  $yShipments+30); //left
 	              	$page->drawLine(490,  $yShipments-10, 490,  $yShipments+30); //left
 	              	$page->drawLine(570,  $yShipments-10, 570,  $yShipments+30); //left
 	              	$page->drawLine(25,  $yShipments-10,     570, $yShipments-10); //bottom
@@ -313,17 +315,32 @@ class Ecom_Express_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_A
 	              	$yShipments -= $topMargin + 10; 	
 	              	
 	              }
-           	  
+              if($order->getShippingAmount())
+                $shippingAmount = $order->getShippingAmount();
+              $shipIds = array();
+              if(count($order->getShipmentsCollection()->getData())>1){
+                foreach($order->getShipmentsCollection() as $bulkshipment){
+                  if($shipment->getEntityId()!=$bulkshipment->getEntityId())
+                    $shipIds[] = $bulkshipment->getEntityId();
+                  //print_r($shipment->getEntityId());
+                }
+                if(max($shipIds) < $shipment->getEntityId()) {
+                  $flag = false;
+                  $shippingAmount = 0;
+                }
+              }
+
+              
               $page->drawText(($weight), 520, $this->y+240, 'UTF-8');
               $page->drawText((max($prod_length['length'])."*".array_sum($prod_width['width'])."*".max($prod_height['height'])), 105, $this->y+240, 'UTF-8');
-               if($order->getShippingAmount())
-              	$page->drawText(Mage::helper('sales')->__('Shipping & Handling Charge :    ₹') .round($order->getShippingAmount(),2),190, $yShipments-45, 'UTF-8');
-              if(strcmp($payment[0] ,'Cash On Delivery')==0){
-              	$grand_total= $order->getTaxAmount() + $order->getGrandTotal();
+               if($flag==true)
+              	$page->drawText(Mage::helper('sales')->__('Shipping & Handling Charge :    '.Mage::app()->getLocale()->currency($order->getOrderCurrencyCode())->getSymbol()) .round($order->getShippingAmount(),2),190, $yShipments-45, 'UTF-8');
+              if($paymentMethod == 'cashondelivery' || $paymentMethod=='checkmo' || $paymentMethod == 'msp_cashondelivery' || $paymentMethod == 'phoenix_cashondelivery'){
+              	$grand_total= $shippingAmount + $subtotal;
               	$this->_setFontBold($page, 12);
               	$page->drawText(Mage::helper('sales')->__('COLLECT ONLY') ." (".strtoupper($payment[0]).") : ",190, ($yShipments-60), 'UTF-8');
               	$this->_setFontRegular($page, 10);
-              	$page->drawText(Mage::helper('sales')->__('₹').$grand_total,405, ($yShipments-60), 'UTF-8');
+              	$page->drawText(Mage::helper('sales')->__(Mage::app()->getLocale()->currency($order->getOrderCurrencyCode())->getSymbol()).$grand_total,405, ($yShipments-60), 'UTF-8');
               	$length_yship[] =$yShipments;
               }
               else

@@ -20,7 +20,7 @@ class Ecom_Express_IndexController extends Mage_Core_Controller_Front_Action {
 	
 	public function printAction()
 	{
-	
+		die('index');
 		/** @see Mage_Adminhtml_Sales_Order_InvoiceController */
 		if ($shipmentId = $this->getRequest()->getParam('invoice_id')) { // invoice_id o_0
 			if ($shipment = Mage::getModel('sales/order_shipment')->load($shipmentId)) {
