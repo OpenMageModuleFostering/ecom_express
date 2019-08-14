@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/Ecom_Express",
+    "type": "magento-module",
+    "license": "OSL",
+    "homepage": "",
+    "description": "ECOM EXPRESS",
+    "authors": [
+    {
+        "name": "CedCommerce",
+        "email": "connect@cedcommerce.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

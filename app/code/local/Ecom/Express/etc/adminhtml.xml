@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--/**
+ * EcomExpress
+  *
+  * NOTICE OF LICENSE
+  *
+  * This source file is subject to the Open Source License (OSL 3.0)
+  * It is also available through the world-wide-web at this URL:
+  * http://opensource.org/licenses/osl-3.0.php
+  *
+  * @category    Ecom
+  * @package     Ecom_Express
+  * @author      Ecom Dev Team <developer@ecomexpress.com >
+  * @copyright   Copyright EcomExpress (http://ecomexpress.com/)
+  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+  */-->
+ 
+<config>
+		<menu>
+            <ecomexpress module="ecomexpress">
+                <title>Ecom Express</title>
+                <sort_order>75</sort_order>
+                <children>
+               		 <pincode>
+						<title>Manage Pincode</title>
+						<sort_order>0</sort_order>
+						<action>adminhtml/adminhtml_pincode</action>
+					</pincode>	
+                    <awb>
+                        <title>Manage AWB</title>
+                        <sort_order>2</sort_order>
+						<action>adminhtml/adminhtml_awb</action>
+					</awb>			                  
+                </children>
+            </ecomexpress>
+        </menu>
+        
+         <acl>
+            <resources>
+                <all>
+                    <title>Allow Everything</title>
+                </all>
+                <admin>
+                    <children>
+                        <ecomexpress>
+                            <title>Ecom Express</title>
+                            <sort_order>11</sort_order>
+                            <children>
+                           		<pincode>
+                                    <title>Manage Pincode</title>
+                                </pincode>
+                                <awb>
+                                    <title>Manage AWB</title>
+                                </awb>
+                            </children>
+                        </ecomexpress>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <ecomexpress>
+                                            <title>Ecom Express Settings</title>
+                                        </ecomexpress>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+       </acl>
+</config>

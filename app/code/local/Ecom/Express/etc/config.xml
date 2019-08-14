@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<!-- /**
+ * EcomExpress
+  *
+  * NOTICE OF LICENSE
+  *
+  * This source file is subject to the Open Source License (OSL 3.0)
+  * It is also available through the world-wide-web at this URL:
+  * http://opensource.org/licenses/osl-3.0.php
+  *
+  * @category    Ecom
+  * @package     Ecom_Express
+  * @author      Ecom Dev Team <developer@ecomexpress.com >
+  * @copyright   Copyright EcomExpress (http://ecomexpress.com/)
+  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+  */ -->
+
+<config>
+    <modules>
+        <Ecom_Express>
+            <version>0.3.0</version>
+            <parent_product_name>Ecom Express</parent_product_name>
+            <author>CedCommerce Core Team (connect@cedcommerce.com)</author>
+        </Ecom_Express>
+    </modules>
+    <frontend>
+        <routers>
+            <ecomexpress>
+                <use>standard</use>
+                <args>
+                    <module>Ecom_Express</module>
+                    <frontName>ecomexpress</frontName>
+                </args>
+            </ecomexpress>
+        </routers>
+        <layout>
+            <updates>
+                <ecomexpress>
+                    <file>ecom/express/ecomexpress.xml</file>
+                </ecomexpress>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Ecom_Express>
+                    <files>
+                        <default>Ecom_Express.csv</default>
+                    </files>
+                </Ecom_Express>
+            </modules>
+        </translate>
+    </frontend>
+     
+    <admin>
+        <routers>
+            <adminhtml>
+                <use>admin</use>
+                <args>
+                  	<modules>
+                        <ecomexpress after="Mage_Adminhtml">Ecom_Express</ecomexpress>
+                     </modules>                     
+                </args>
+            </adminhtml>
+        </routers>     
+    </admin>
+    
+    <adminhtml>
+        <layout>
+            <updates>
+                <ecomexpress>
+                    <file>ecom/express/ecomexpress.xml</file>
+                </ecomexpress>
+            </updates>
+        </layout>
+    </adminhtml>
+    
+    <global>
+        <models>
+            <ecomexpress>
+                <class>Ecom_Express_Model</class>
+                <resourceModel>ecomexpress_mysql4</resourceModel>
+            </ecomexpress>
+             <sales>
+		        <rewrite>                    
+		             <order_pdf_shipment>Ecom_Express_Model_Order_Pdf_Shipment</order_pdf_shipment>
+		        </rewrite>
+    		</sales>  
+    		
+            <ecomexpress_mysql4>
+                <class>Ecom_Express_Model_Mysql4</class>
+                <entities>
+                    <awb>
+                        <table>ecomexpress_awb</table>
+                    </awb>
+                    <pincode>
+                        <table>ecomexpress_pincode</table>
+                    </pincode>
+                </entities>
+            </ecomexpress_mysql4>
+        </models>
+        
+        <blocks>
+            <ecomexpress>
+                	<class>Ecom_Express_Block</class>
+            </ecomexpress>  
+	        <adminhtml>
+	            <rewrite>
+	                <sales_shipment_grid>Ecom_Express_Block_Adminhtml_Sales_Shipment_Grid</sales_shipment_grid>
+	            </rewrite>
+	         </adminhtml> 	
+	        <adminhtml>
+	            <rewrite>
+	                <sales_order_shipment_view>Ecom_Express_Block_Adminhtml_Sales_Order_Shipment_View</sales_order_shipment_view>
+	            </rewrite>
+    
+ 			  </adminhtml> 
+        </blocks>
+        <helpers>
+            <ecomexpress>
+                <class>Ecom_Express_Helper</class>
+            </ecomexpress>
+        </helpers>
+        <resources>
+            <ecomexpress_setup>
+                <setup>
+                    <module>Ecom_Express</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </ecomexpress_setup>
+            <ecomexpress_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </ecomexpress_write>
+            <ecomexpress_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </ecomexpress_read>
+        </resources>
+
+        <events>
+	       <sales_order_shipment_save_before>
+	            <observers>
+	                <ecom_express_sales_order_shipment_save_before>
+	                    <type>singleton</type>
+	                    <class>Ecom_Express_Model_Observer</class>
+	                    <method>salesOrderShipmentSaveBefore</method>
+	                </ecom_express_sales_order_shipment_save_before>
+	            </observers>
+	       </sales_order_shipment_save_before>
+             <sales_order_shipment_track_save_after>
+            <observers>
+                <ecom_express_sales_order_shipment_track_save_after>
+                    <type>singleton</type>
+                    <class>Ecom_Express_Model_Observer</class>
+                    <method>salesOrderShipmentTrackSaveAfter</method>
+                </ecom_express_sales_order_shipment_track_save_after>
+            </observers>
+        </sales_order_shipment_track_save_after> 
+    </events>
+    </global>
+    
+     <crontab>
+	        <jobs>
+	            <ecomexpress>
+	            	<schedule>
+	            		<cron_expr>0 0 * * *</cron_expr>
+	            	</schedule>
+	                <run>
+	                	<model>ecomexpress/observer::fetchAwb</model>
+	                </run>
+	           </ecomexpress>
+	        </jobs>
+	</crontab>
+    <default>
+        <ecomexpress>
+            <ecomexpress>
+                <ecomexpress_time_delay>3000</ecomexpress_time_delay>
+				<ecomexpress_autoplay>1</ecomexpress_autoplay>
+                <ecomexpress_toplink_enabled>1</ecomexpress_toplink_enabled>
+            </ecomexpress>
+        </ecomexpress>
+		<carriers>
+            <ecomexpress>
+                <active>0</active>
+                <showmethod>1</showmethod>
+                <model>ecomexpress/carrier_ecomexpress</model>
+                <name>Ecom Express</name>
+                <title>Ecom Express</title>
+                <specificerrmsg>This shipping method is currently unavailable in this pincode.</specificerrmsg>
+            </ecomexpress>
+		</carriers>			
+    </default> 
+</config>

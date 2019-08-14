@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!-- /**
+ * EcomExpress
+  *
+  * NOTICE OF LICENSE
+  *
+  * This source file is subject to the Open Source License (OSL 3.0)
+  * It is also available through the world-wide-web at this URL:
+  * http://opensource.org/licenses/osl-3.0.php
+  *
+  * @category    Ecom
+  * @package     Ecom_Express
+  * @author      Ecom Dev Team <developer@ecomexpress.com >
+  * @copyright   Copyright EcomExpress (http://ecomexpress.com/)
+  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+  */
+ -->
+
+<layout version="0.1.1">
+    <adminhtml_adminhtml_pincode_index>
+		<update handle="editor"/>
+        <reference name="content">
+            <block type="ecomexpress/adminhtml_pincode" name="pincode" />
+        </reference>
+    </adminhtml_adminhtml_pincode_index>
+    
+    <adminhtml_adminhtml_awb_index>
+		<update handle="editor"/>
+        <reference name="content">
+            <block type="ecomexpress/adminhtml_awb" name="awb" />
+        </reference>
+    </adminhtml_adminhtml_awb_index>
+    
+   <adminhtml_sales_order_shipment_view>
+         <reference name="head">
+              <action method="addJs"><file>ecom/ecomexpress.js</file><params>async="async"</params></action> 
+         </reference> 
+       <reference name="head">
+            <action method="addItem">
+                <type>js_css</type>
+                <name>prototype/windows/themes/default.css</name>
+            </action>
+            <action method="addCss">
+                <name>lib/prototype/windows/themes/magento.css</name>
+            </action>
+        </reference>
+    </adminhtml_sales_order_shipment_view>
+</layout>
