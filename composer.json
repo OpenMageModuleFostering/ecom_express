@@ -1,7 +1,7 @@
 {
-    "name": "OpenMageModuleFostering\/Ecom_Express",
+    "name": "openmage-module-fostering\/ecom_express",
     "type": "magento-module",
-    "license": "Open-Software-License-(OSL)",
+    "license": "OSL-3.0",
     "homepage": "",
     "description": "Ecom_Express",
     "authors": [
