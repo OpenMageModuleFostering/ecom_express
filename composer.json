@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/Ecom_Express",
+    "name": "OpenMageModuleFostering\/Ecom_Express",
     "type": "magento-module",
     "license": "Open-Software-License-(OSL)",
     "homepage": "",
     "description": "Ecom_Express",
     "authors": [
-    {
-        "name": "Cedcommerce",
-        "email": "support@cedcommerce.com"
-    }
-],
+        {
+            "name": "Cedcommerce",
+            "email": "support@cedcommerce.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
